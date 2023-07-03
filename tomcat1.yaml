@@ -1,0 +1,23 @@
+---
+- hosts: all
+  become: yes
+  vars:
+    tomcat_url: 'https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.10/bin/apache-tomcat-10.1.10.tar.gz'
+
+  tasks:
+    - name: Download and Extract apache tomcat
+      unarchive:
+        src: "{{ tomcat_url }}"
+        dest: "/opt/"
+        remote_src: yes
+
+    - name: Synchronize the "{{ tomcat_url.split('/')[-1].rstrip('.tar.gz') }}" directory to apache on one remote host
+      synchronize:
+        src: "/opt/{{ tomcat_url.split('/')[-1].rstrip('.tar.gz') }}"
+        dest: "/opt/apache"
+      delegate_to: "{{ inventory_hostname }}"
+
+    - name: Remove the {{ tomcat_url.split('/')[-1].rstrip('.tar.gz') }} directory
+      file:
+        path: "/opt/{{ tomcat_url.split('/')[-1].rstrip('.tar.gz') }}"
+        state: absent

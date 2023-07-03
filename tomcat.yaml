@@ -1,0 +1,23 @@
+---
+- name: Install Apache tomcat 10  using ansible
+  hosts: dev
+
+  
+  tasks: 
+    - name: create tomcat user
+      user: name=tomcat
+    - name: create tomcat group
+      group: name=tomcat
+    - name: Install JAva
+      apt: name=default-jdk state=present
+    - name: Create Tomcat directory
+      file: path=/opt/tomcat10 owner=tomcat group=tomcat mode=755 recurse=yes
+    - name: download and unarchive tomcat
+      unarchive: src="https://dlcdn.apache.org/tomcat/tomcat-10/v10.0.20/bin/apache-tomcat-10.0.20.tar.gz" dest=/opt/tomcat10 remote_src=yes
+    - name: change ownership of tomcat dir
+      file: path=/opt/tomcat10 owner=tomcat group=tomcat mode="u+rwx,g+rx,o=rx" recurse=yes state=directory
+    - name: Copt tomcat service from local to remote
+      copy: src=/etc/tomcat.service dest=/etc/systemd/system mode=0755
+    - name: start and enable tomcat 10 on server
+      systemd: name=tomcat state=started daemon_reload=true
+       
